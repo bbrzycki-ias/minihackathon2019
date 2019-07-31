@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[6]:
 
 
 import pytorch_transformers
 import torch
-import torchvision
 import numpy as np
 import pandas as pd
 import string
@@ -25,19 +24,71 @@ import csv
 import io
 import copy
 import matplotlib.pyplot as plt
-import seaborn as sns
-import spacy 
-from spacy_langdetect import LanguageDetector
 import time
 
 
-# In[ ]:
+# In[8]:
 
 
-data = pd.read_csv('/Users/dnissani/Desktop/Test_SageMaker/bert_drug_train.csv')
+data = pd.read_csv('/home/ubuntu/Bert_Data/bert_drug_train.csv')
 
 
-# In[ ]:
+# In[9]:
+
+
+tokenizer = pytorch_transformers.BertTokenizer.from_pretrained('bert-base-multilingual-cased')
+
+
+# In[10]:
+
+
+pytorch_transformers.BertConfig.from_pretrained('bert-base-multilingual-cased')
+
+
+# In[11]:
+
+
+model = pytorch_transformers.BertModel.from_pretrained('bert-base-multilingual-cased', output_hidden_states = True)
+model.eval()
+
+
+# In[12]:
+
+
+text_model = pytorch_transformers.BertForSequenceClassification.from_pretrained('bert-base-multilingual-cased', num_labels = 3)
+
+
+# In[13]:
+
+
+input_ids = torch.tensor(tokenizer.encode("Hello, my dog is cute")).unsqueeze(0)
+
+
+# In[14]:
+
+
+input_ids
+
+
+# In[15]:
+
+
+labels = torch.tensor([1]).unsqueeze(0)
+
+
+# In[16]:
+
+
+outputs = text_model(input_ids, labels = labels)
+
+
+# In[17]:
+
+
+outputs
+
+
+# In[19]:
 
 
 inputs = []
@@ -50,114 +101,22 @@ for el in data.values:
     else:
         labels.append(torch.tensor([2]).unsqueeze(0))
     
-    text = el[1].split(' ' and '\t' and '\n' and '/')
+    text = tokenizer.tokenize(el[1])
     text = ' '.join(text)[:512]
     inputs.append(torch.tensor(tokenizer.encode(text)).unsqueeze(0))
 
 
-# In[ ]:
+# In[21]:
 
 
-tokenizer = pytorch_transformers.BertTokenizer.from_pretrained('bert-base-multilingual-cased')
 
+    for el, label in zip(inputs, labels):
 
-# In[ ]:
 
+# In[22]:
 
-model = pytorch_transformers.BertModel.from_pretrained('bert-base-multilingual-cased', output_hidden_states = True)
-model.eval()
 
-
-# In[ ]:
-
-
-text_model = pytorch_transformers.BertForSequenceClassification.from_pretrained('bert-base-multilingual-cased', num_labels = 3)
-
-
-# In[ ]:
-
-
-input_ids = torch.tensor(tokenizer.encode("Hello, my dog is cute")).unsqueeze(0)
-
-
-# In[ ]:
-
-
-input_ids
-
-
-# In[ ]:
-
-
-labels = torch.tensor([1]).unsqueeze(0)
-
-
-# In[ ]:
-
-
-labels
-
-
-# In[ ]:
-
-
-outputs = text_model(input_ids)
-
-
-# In[ ]:
-
-
-outputs
-
-
-# In[ ]:
-
-
-loss, logits = outputs
-
-
-# In[ ]:
-
-
-loss
-
-
-# In[ ]:
-
-
-logits
-
-
-# In[ ]:
-
-
-data.head()
-
-
-# In[ ]:
-
-
-data.values[0,1]
-
-
-# In[ ]:
-
-
-inputs[:10]
-
-
-# In[ ]:
-
-
-output = []
-for el, label in zip(inputs, labels):
-    output.append(text_model(el, label))
-
-
-# In[ ]:
-
-
-output[4]
+output
 
 
 # In[ ]:
