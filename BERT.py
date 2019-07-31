@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[37]:
+# In[ ]:
 
 
 import pytorch_transformers
@@ -31,115 +31,13 @@ from spacy_langdetect import LanguageDetector
 import time
 
 
-# In[9]:
-
-
-config = pytorch_transformers.BertConfig.from_pretrained('bert-base-multilingual-cased')
-
-
-# In[14]:
-
-
-config
-
-
-# In[10]:
-
-
-tokenizer = pytorch_transformers.BertTokenizer.from_pretrained('bert-base-multilingual-cased')
-
-
-# In[15]:
-
-
-tokenizer
-
-
-# In[13]:
-
-
-model = pytorch_transformers.BertForSequenceClassification(config)
-
-
-# In[16]:
-
-
-model
-
-
-# In[25]:
-
-
-input_ids = torch.tensor(tokenizer.encode("Hello, my dog is cute")).unsqueeze(0)
-
-
-# In[26]:
-
-
-input_ids
-
-
-# In[27]:
-
-
-labels = torch.tensor([1]).unsqueeze(0)
-
-
-# In[28]:
-
-
-labels
-
-
-# In[29]:
-
-
-outputs = model(input_ids, labels=labels)
-
-
-# In[30]:
-
-
-outputs
-
-
-# In[34]:
-
-
-loss, logits = outputs
-
-
-# In[35]:
-
-
-loss
-
-
-# In[36]:
-
-
-logits
-
-
-# In[44]:
+# In[ ]:
 
 
 data = pd.read_csv('/Users/dnissani/Desktop/Test_SageMaker/bert_drug_train.csv')
 
 
-# In[45]:
-
-
-data.head()
-
-
-# In[46]:
-
-
-len(data)
-
-
-# In[47]:
+# In[ ]:
 
 
 inputs = []
@@ -151,8 +49,115 @@ for el in data.values:
         labels.append(torch.tensor([1]).unsqueeze(0))
     else:
         labels.append(torch.tensor([2]).unsqueeze(0))
-        
-    inputs.append(torch.tensor(tokenizer.encode(el[1])).unsqueeze(0))
+    
+    text = el[1].split(' ' and '\t' and '\n' and '/')
+    text = ' '.join(text)[:512]
+    inputs.append(torch.tensor(tokenizer.encode(text)).unsqueeze(0))
+
+
+# In[ ]:
+
+
+tokenizer = pytorch_transformers.BertTokenizer.from_pretrained('bert-base-multilingual-cased')
+
+
+# In[ ]:
+
+
+model = pytorch_transformers.BertModel.from_pretrained('bert-base-multilingual-cased', output_hidden_states = True)
+model.eval()
+
+
+# In[ ]:
+
+
+text_model = pytorch_transformers.BertForSequenceClassification.from_pretrained('bert-base-multilingual-cased', num_labels = 3)
+
+
+# In[ ]:
+
+
+input_ids = torch.tensor(tokenizer.encode("Hello, my dog is cute")).unsqueeze(0)
+
+
+# In[ ]:
+
+
+input_ids
+
+
+# In[ ]:
+
+
+labels = torch.tensor([1]).unsqueeze(0)
+
+
+# In[ ]:
+
+
+labels
+
+
+# In[ ]:
+
+
+outputs = text_model(input_ids)
+
+
+# In[ ]:
+
+
+outputs
+
+
+# In[ ]:
+
+
+loss, logits = outputs
+
+
+# In[ ]:
+
+
+loss
+
+
+# In[ ]:
+
+
+logits
+
+
+# In[ ]:
+
+
+data.head()
+
+
+# In[ ]:
+
+
+data.values[0,1]
+
+
+# In[ ]:
+
+
+inputs[:10]
+
+
+# In[ ]:
+
+
+output = []
+for el, label in zip(inputs, labels):
+    output.append(text_model(el, label))
+
+
+# In[ ]:
+
+
+output[4]
 
 
 # In[ ]:
